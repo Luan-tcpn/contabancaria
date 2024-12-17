@@ -15,9 +15,9 @@ public class Menu {
 
 		ContaController contas = new ContaController();
 		Scanner leia = new Scanner(System.in);
-		int opcao, numero, agencia, tipo, aniversario;
+		int opcao, numero, agencia, tipo, aniversario, numeroDestino;
 		String titular;
-		float saldo, limite;
+		float saldo, limite, valor;
 		
 		System.out.println("\nCriar Contas\n");
 		
@@ -26,8 +26,8 @@ public class Menu {
 		ContaCorrente cc3 = new ContaCorrente(contas.gerarNumero(), 125, 1, "Americo Ferreira", 1000.00f, 200.50f);
 		
 		ContaPoupanca cp1 = new ContaPoupanca(contas.gerarNumero(), 126, 2, "Felix Torres", 1000.00f, 1);
-		ContaPoupanca cp2 = new ContaPoupanca(contas.gerarNumero(), 126, 2, "Rodrigo", 2000.00f, 8);
-		ContaPoupanca cp3 = new ContaPoupanca(contas.gerarNumero(), 126, 2, "Ana Maria", 6000.00f, 10);
+		ContaPoupanca cp2 = new ContaPoupanca(contas.gerarNumero(), 127, 2, "Rodrigo", 2000.00f, 8);
+		ContaPoupanca cp3 = new ContaPoupanca(contas.gerarNumero(), 128, 2, "Ana Maria", 6000.00f, 10);
 
 		contas.listarTodas();
 		
@@ -63,8 +63,8 @@ public class Menu {
 
 		while (true) {
 
-			System.out.println(Cores.TEXT_PURPLE + Cores.ANSI_BLACK_BACKGROUND);
-			System.out.println("*****************************************************");
+			System.out.println(Cores.TEXT_PURPLE + Cores.ANSI_BLACK_BACKGROUND 
+			 + "*****************************************************");
 			System.out.println("                                                     ");
 			System.out.println("               BANCO SEM COBRANÇA                      ");
 			System.out.println("                                                     ");
@@ -83,7 +83,7 @@ public class Menu {
 			System.out.println("*****************************************************");
 			System.out.println("Entre com a opção desejada:                          ");
 			System.out.println("                                                     ");
-			System.out.println(Cores.TEXT_RESET);
+			System.out.println("                                                      " + Cores.TEXT_RESET);
 			opcao = leia.nextInt();
 
 			// try catch
@@ -120,16 +120,16 @@ public class Menu {
 				saldo = leia.nextFloat();
 
 				switch (tipo) {
-				case 1:
+				case 1 -> {
 					System.out.println("Digite o limite de Crédito (R$): ");
 					limite = leia.nextFloat();
 					contas.cadastrar(new ContaCorrente(contas.gerarNumero(), agencia, tipo, titular, saldo, limite));
-					break;
-				case 2: 
+				}
+				case 2 -> { 
 					System.out.println("Digite o dia de aniversário da conta: ");
 					aniversario = leia.nextInt();
 					contas.cadastrar(new ContaPoupanca(contas.gerarNumero(), agencia, tipo, titular, saldo, aniversario));
-					break;
+				}
 				}
 				
 			
@@ -145,31 +145,118 @@ public class Menu {
 
 			case 3:
 				System.out.println(Cores.TEXT_WHITE_BOLD + "Consultar dados da Conta - por número");
+				
+				System.out.println("Digite o npumero da conta: ");
+				numero = leia.nextInt();
+				
+				contas.procurarPorNumero(numero);
+				
 				keyPress();
 				break;
 
 			case 4:
 				System.out.println(Cores.TEXT_WHITE_BOLD + "Atualizar dados da Conta");
+				
+				System.out.println("Digite o número da conta: ");
+				numero = leia.nextInt();
+				
+				var buscaConta = contas.buscarNaCollection(numero);
+
+				if (buscaConta != null) {
+					
+					System.out.println("Digite o Numero da Agência: ");
+					agencia = leia.nextInt();
+					System.out.println("Digite o Nome do Titular: ");
+					leia.skip("\\R?");
+					titular = leia.nextLine();
+						
+					System.out.println("Digite o Saldo da Conta (R$): ");
+					saldo = leia.nextFloat();
+					
+					tipo = buscaConta.getTipo();
+					
+					switch(tipo) {
+						case 1 -> {
+							System.out.println("Digite o Limite de Crédito (R$): ");
+							limite = leia.nextFloat();
+							contas.atualizar(new ContaCorrente(numero, agencia, tipo, titular, saldo, limite));
+						}
+						case 2 -> {
+							System.out.println("Digite o dia do Aniversario da Conta: ");
+							aniversario = leia.nextInt();
+							contas.atualizar(new ContaPoupanca(numero, agencia, tipo, titular, saldo, aniversario));
+						}
+						default ->{
+							System.out.println("Tipo de conta inválido!");
+						}
+					}
+					
+				}else
+					System.out.println("\nConta não encontrada!");
+				
 				keyPress();
 				break;
 
 			case 5:
 				System.out.println(Cores.TEXT_WHITE_BOLD + "Apagar a conta");
+				
+				System.out.println("Digite o numero da conta: ");
+				numero = leia.nextInt();
+				
+				contas.deletar(numero);
+				
 				keyPress();
 				break;
 
 			case 6:
 				System.out.println(Cores.TEXT_WHITE_BOLD + "Saque");
+				
+				System.out.println("Digite o Numero da conta: ");
+				numero = leia.nextInt();
+
+				do {
+					System.out.println("Digite o Valor do Saque (R$): ");
+					valor = leia.nextFloat();
+				} while (valor <= 0);
+
+				contas.sacar(numero, valor);
+
+				
 				keyPress();
 				break;
 
 			case 7:
 				System.out.println(Cores.TEXT_WHITE_BOLD + "Depósito");
+				
+				System.out.println("Digite o Numero da conta: ");
+				numero = leia.nextInt();
+
+				do {
+					System.out.println("Digite o Valor do Depósito (R$): ");
+					valor = leia.nextFloat();
+				} while (valor <= 0);
+
+				contas.depositar(numero, valor);
+				
 				keyPress();
 				break;
 
 			case 8:
 				System.out.println(Cores.TEXT_WHITE_BOLD + "Transferência entre contas");
+				
+				System.out.println("Digite o Numero da Conta de Origem: ");
+				numero = leia.nextInt();
+				System.out.println("Digite o Numero da Conta de Destino: ");
+				numeroDestino = leia.nextInt();
+
+				do {
+					System.out.println("Digite o Valor da Transferência (R$): ");
+					valor = leia.nextFloat();
+				} while (valor <= 0);
+
+				contas.transferir(numero, numeroDestino, valor);
+
+				
 				keyPress();
 				break;
 
